@@ -11,3 +11,18 @@ export type VolunteerRecord = {
 }
 
 export type VolunteerForm = Omit<VolunteerRecord, "id" | "estado" | "createdAt">
+
+export type User = {
+  nombre: string
+  email: string
+}
+
+export type Activity = {
+  id: string
+  nombre: string
+  categoria: string
+  fecha: string
+  lugar: string
+  cupos: number
+  descripcion: string
+}

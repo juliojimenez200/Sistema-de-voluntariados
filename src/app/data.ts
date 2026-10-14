@@ -1,6 +1,53 @@
-import type { VolunteerForm, VolunteerRecord } from "./types"
+import type { Activity, User, VolunteerForm, VolunteerRecord } from "./types"
 
 const STORAGE_KEY = "sumamos-registros"
+const USERS_KEY = "sumamos-usuarios"
+const SESSION_KEY = "sumamos-sesion"
+
+export const activities: Activity[] = [
+  {
+    id: "ACT-001",
+    nombre: "Reforestación del Parque Central",
+    categoria: "Medio ambiente",
+    fecha: "2027-04-18",
+    lugar: "Parque Central",
+    cupos: 24,
+    descripcion:
+      "Siembra de árboles nativos y recuperación de las zonas verdes del parque.",
+  },
+  {
+    id: "ACT-002",
+    nombre: "Apoyo en comedor comunitario",
+    categoria: "Ayuda social",
+    fecha: "2027-04-22",
+    lugar: "Centro Comunitario La Esperanza",
+    cupos: 15,
+    descripcion:
+      "Preparación y entrega de alimentos para familias de la comunidad.",
+  },
+  {
+    id: "ACT-003",
+    nombre: "Tutorías para niños",
+    categoria: "Educación",
+    fecha: "2027-04-26",
+    lugar: "Biblioteca Municipal",
+    cupos: 12,
+    descripcion:
+      "Acompañamiento en lectura, escritura y matemáticas para estudiantes.",
+  },
+  {
+    id: "ACT-004",
+    nombre: "Jornada de bienestar animal",
+    categoria: "Animales",
+    fecha: "2027-05-03",
+    lugar: "Refugio Huellas",
+    cupos: 18,
+    descripcion:
+      "Apoyo en alimentación, limpieza y socialización de animales rescatados.",
+  },
+]
+
+type StoredUser = User & { password: string }
 
 const initialRecords: VolunteerRecord[] = [
   {
@@ -43,6 +90,47 @@ const initialRecords: VolunteerRecord[] = [
 
 const wait = (ms = 450) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, ms))
+
+export function getSession(): User | null {
+  const stored = window.localStorage.getItem(SESSION_KEY)
+  return stored ? (JSON.parse(stored) as User) : null
+}
+
+export function registerUser(user: StoredUser): User {
+  const users = JSON.parse(
+    window.localStorage.getItem(USERS_KEY) ?? "[]",
+  ) as StoredUser[]
+  if (users.some((item) => item.email === user.email.toLowerCase())) {
+    throw new Error("Ya existe una cuenta con este correo.")
+  }
+  const normalized = { ...user, email: user.email.toLowerCase() }
+  users.push(normalized)
+  window.localStorage.setItem(USERS_KEY, JSON.stringify(users))
+  const session = { nombre: normalized.nombre, email: normalized.email }
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  window.dispatchEvent(new Event("sumamos-auth"))
+  return session
+}
+
+export function loginUser(email: string, password: string): User {
+  const users = JSON.parse(
+    window.localStorage.getItem(USERS_KEY) ?? "[]",
+  ) as StoredUser[]
+  const user = users.find(
+    (item) =>
+      item.email === email.toLowerCase() && item.password === password,
+  )
+  if (!user) throw new Error("El correo o la contraseña no son correctos.")
+  const session = { nombre: user.nombre, email: user.email }
+  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  window.dispatchEvent(new Event("sumamos-auth"))
+  return session
+}
+
+export function logoutUser() {
+  window.localStorage.removeItem(SESSION_KEY)
+  window.dispatchEvent(new Event("sumamos-auth"))
+}
 
 function readLocalRecords(): VolunteerRecord[] {
   const stored = window.localStorage.getItem(STORAGE_KEY)
