@@ -1,0 +1,10 @@
+{
+  "description": "Efficiently register and manage volunteer activities, allowing users to sign up, view details, and track participation in community service events.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
