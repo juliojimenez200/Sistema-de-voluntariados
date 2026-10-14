@@ -1,0 +1,146 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", sans-serif;
+  --font-display: "DM Serif Display", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #fbfcf8;
+  font-family: "Manrope", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+button,
+a,
+select {
+  cursor: pointer;
+}
+
+.page-container {
+  width: min(100% - 32px, 1180px);
+  margin-inline: auto;
+}
+
+.font-display {
+  font-family: "DM Serif Display", serif;
+}
+
+.button-primary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border-radius: 999px;
+  background: #1d6642;
+  padding: 10px 20px;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(29, 102, 66, 0.14);
+}
+
+.button-primary:hover {
+  background: #155436;
+  transform: translateY(-1px);
+}
+
+.button-secondary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid #cbd8ce;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.64);
+  padding: 10px 20px;
+  color: #2c4939;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.button-secondary:hover {
+  background: white;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 999px;
+  background: #e1efdf;
+  padding: 7px 12px;
+  color: #2b6845;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: "DM Serif Display", serif;
+  color: #173a29;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+}
+
+.form-input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #d8e1d9;
+  border-radius: 12px;
+  background: #fbfcfa;
+  padding: 11px 14px;
+  color: #263c31;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-input::placeholder {
+  color: #98a29b;
+}
+
+.form-input:focus {
+  border-color: #4c8865;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(47, 119, 77, 0.1);
+}
+
+textarea.form-input {
+  min-height: 112px;
+}
+
+@media (max-width: 640px) {
+  .page-container {
+    width: min(100% - 24px, 1180px);
+  }
+}
