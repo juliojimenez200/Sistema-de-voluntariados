@@ -38,14 +38,26 @@ export function createApp({ storage, allowedOrigin = "*" }) {
       })
     }
 
-    const record = {
-      id: `VOL-${randomUUID().slice(0, 8).toUpperCase()}`,
-      ...data,
-      estado: "Confirmada",
-      createdAt: new Date().toISOString(),
-    }
-
     try {
+      const records = await storage.readAll()
+      const duplicate = records.some(
+        (record) =>
+          record.email.trim().toLowerCase() === data.email &&
+          record.actividad.trim().toLowerCase() ===
+            data.actividad.toLowerCase(),
+      )
+      if (duplicate) {
+        return response.status(409).json({
+          error: "Ya tienes una inscripción para esta actividad.",
+        })
+      }
+
+      const record = {
+        id: `VOL-${randomUUID().slice(0, 8).toUpperCase()}`,
+        ...data,
+        estado: "Confirmada",
+        createdAt: new Date().toISOString(),
+      }
       await storage.add(record)
       return response.status(201).json(record)
     } catch (error) {

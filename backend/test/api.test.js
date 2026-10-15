@@ -56,7 +56,7 @@ test("POST rechaza datos inválidos con código 400", async () => {
   assert.ok(body.detalles.length >= 1)
 })
 
-test("POST crea un registro y GET permite consultarlo", async () => {
+test("POST crea un registro, rechaza duplicados y GET permite consultarlo", async () => {
   const input = {
     nombre: "Ana Martínez",
     email: "ana@example.com",
@@ -76,6 +76,17 @@ test("POST crea un registro y GET permite consultarlo", async () => {
   assert.equal(createResponse.status, 201)
   assert.match(created.id, /^VOL-[A-F0-9]{8}$/)
   assert.equal(created.estado, "Confirmada")
+
+  const duplicateResponse = await fetch(`${baseUrl}/registros`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...input, email: ` ${input.email.toUpperCase()} ` }),
+  })
+  assert.equal(duplicateResponse.status, 409)
+  assert.equal(
+    (await duplicateResponse.json()).error,
+    "Ya tienes una inscripción para esta actividad.",
+  )
 
   const getResponse = await fetch(`${baseUrl}/registros`)
   const records = await getResponse.json()

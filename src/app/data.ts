@@ -100,10 +100,13 @@ export function registerUser(user: StoredUser): User {
   const users = JSON.parse(
     window.localStorage.getItem(USERS_KEY) ?? "[]",
   ) as StoredUser[]
-  if (users.some((item) => item.email === user.email.toLowerCase())) {
+  const normalizedEmail = user.email.trim().toLowerCase()
+  if (
+    users.some((item) => item.email.trim().toLowerCase() === normalizedEmail)
+  ) {
     throw new Error("Ya existe una cuenta con este correo.")
   }
-  const normalized = { ...user, email: user.email.toLowerCase() }
+  const normalized = { ...user, email: normalizedEmail }
   users.push(normalized)
   window.localStorage.setItem(USERS_KEY, JSON.stringify(users))
   const session = { nombre: normalized.nombre, email: normalized.email }
