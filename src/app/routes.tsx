@@ -221,6 +221,23 @@ function Register() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   if (!session) return <section className="grid min-h-[70vh] place-items-center bg-[#f5f8f2] p-6"><div className="max-w-lg rounded-[28px] bg-white p-10 text-center"><h1 className="section-title">Primero inicia sesión</h1><p className="mt-3 text-[#65756c]">Crea tu cuenta o ingresa para reservar un cupo.</p><Link to="/acceso" className="button-primary mt-7">Ingresar o crear cuenta</Link></div></section>
   const selected = activities.find((item) => item.nombre === form.actividad)
+  function getSessionBoundForm(): VolunteerForm | null {
+    const currentSession = getSession()
+    if (!currentSession) return null
+
+    const nombre = currentSession.nombre.trim()
+    const email = currentSession.email.trim().toLowerCase()
+    if (
+      !nombre ||
+      !email ||
+      form.nombre.trim() !== nombre ||
+      form.email.trim().toLowerCase() !== email
+    ) {
+      return null
+    }
+
+    return { ...form, nombre, email }
+  }
   function choose(id: string) {
     const item = activities.find((activity) => activity.id === id)
     setForm({ ...form, actividad: item?.nombre ?? "", categoria: item?.categoria ?? "", fecha: item?.fecha ?? "" })
@@ -230,8 +247,12 @@ function Register() {
   function reviewSubmission(event: FormEvent) {
     event.preventDefault()
     setError("")
+    const sessionBoundForm = getSessionBoundForm()
+    if (!sessionBoundForm) {
+      setError("El nombre y correo deben coincidir con los de tu cuenta. Cierra sesión e ingresa nuevamente.")
+      return
+    }
     const errors: typeof fieldErrors = {}
-    if (!form.nombre.trim() || !form.email.trim()) setError("No encontramos tus datos de participante. Cierra sesión e inicia sesión nuevamente.")
     if (!form.actividad || !selected) errors.actividad = "Selecciona una actividad válida."
     const today = new Date()
     const todayIso = new Date(today.getTime() - today.getTimezoneOffset() * 60_000).toISOString().slice(0, 10)
@@ -240,26 +261,32 @@ function Register() {
     if (motivation.length < 20) errors.descripcion = "Escribe una motivación de al menos 20 caracteres."
     else if (motivation.length > 300) errors.descripcion = "La motivación no puede superar los 300 caracteres."
     setFieldErrors(errors)
-    if (Object.keys(errors).length > 0 || !form.nombre.trim() || !form.email.trim()) return
-    setForm({ ...form, nombre: form.nombre.trim(), email: form.email.trim().toLowerCase(), descripcion: motivation })
+    if (Object.keys(errors).length > 0) return
+    setForm({ ...sessionBoundForm, descripcion: motivation })
     setReviewing(true)
   }
   async function confirmSubmission() {
     if (isSubmitting) return
+    const sessionBoundForm = getSessionBoundForm()
+    if (!sessionBoundForm) {
+      setError("El nombre y correo deben coincidir con los de tu cuenta. Cierra sesión e ingresa nuevamente.")
+      setReviewing(false)
+      return
+    }
     setIsSubmitting(true)
     setError("")
     try {
       const records = await getRecords()
       const duplicate = records.some((record) =>
-        record.email.trim().toLowerCase() === form.email.trim().toLowerCase() &&
-        record.actividad.trim().toLocaleLowerCase() === form.actividad.trim().toLocaleLowerCase(),
+        record.email.trim().toLowerCase() === sessionBoundForm.email &&
+        record.actividad.trim().toLocaleLowerCase() === sessionBoundForm.actividad.trim().toLocaleLowerCase(),
       )
       if (duplicate) {
         setReviewing(false)
         setError("Ya tienes una inscripción para esta actividad.")
         return
       }
-      await createRecord(form)
+      await createRecord(sessionBoundForm)
       navigate("/lista")
     } catch (err) {
       setError(err instanceof Error ? err.message : "No fue posible guardar la inscripción.")
